@@ -1,0 +1,19 @@
+{
+  "name": "react-native-monacco-editor",
+  "version": "1.0.0",
+  "description": "By using this we can integrate javascript or monacco code editor into our react-native application",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "react-native-monacco-editor"
+  ],
+  "author": "SaiKrishna Nangunuri",
+  "license": "ISC",
+  "peerDependencies": {
+    "react": "18.2.0",
+    "react-native": "0.71.6",
+    "react-native-webview": "^12.0.2"
+  }
+}
