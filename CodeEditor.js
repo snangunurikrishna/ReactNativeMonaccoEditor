@@ -6,11 +6,11 @@ const CodeEditor = () => {
   const webViewRef = useRef(null);
 
   const [messages, setMessages] = useState([]);
-  
+
   const onMessage = event => {
     const data = JSON.parse(event.nativeEvent.data);
     if (data.command === 'consoleLog') {
-      setMessages(prevMessages => [data.data]);
+      setMessages(prevMessages => [...prevMessages,data.data].slice(-5));
       console.log('WebView console.log:', data.data);
     }
   };
@@ -32,54 +32,90 @@ const CodeEditor = () => {
                 body, html, #editor {
                   margin: 0;
                   padding: 0;
-                  height: 80vh;
+                  height: 95vh;
                   width: 100%;
                 }
-                #executeButton {
-                  top: 10px;
-                  right: 10px;
-                  background-color: #1e88e5;
-                  color: white;
+                #undoButton, #redoButton{
+                  background-color: white;
+                  color: orange;
                   border: none;
-                  padding: 10px 15px;
                   border-radius: 4px;
-                  font-size: 14px;
+                  font-size: 20px;
+                  font-weight: bold;
                   cursor: pointer;
                   outline: none;
-                  margin-top:10px;
-                  margin-left:10px;
-                  height: 6vh;
-                  margin-bottom:10px
+                  margin-top: 5px;
+                  margin-left: 5px;
+                  height: 4vh;
+                  margin-bottom: 10px;
                 }
-                #executeButton:hover {
-                  background-color: #1976d2;
+                #executeButton{
+                  right: 10px;
+                  background-color: white;
+                  color: red;
+                  border: none;
+                  border-radius: 4px;
+                  font-size: 20px;
+                  font-weight: bold;
+                  cursor: pointer;
+                  outline: none;
+                  margin-top: 10px;
+                  margin-left: 10px;
+                  height: 4vh;
+                  margin-bottom: 10px;
                 }
-                .buttonsDiv{
-                  display:flex
+                 #openCurlyBracket, #lessThan,#greaterThan, #closeSquareBracket, #closeCurlyBracket,#openSquareBracket, #singleQuote, #doubleQuote,#closeParenthesis, #openParenthesis{
+                  background-color: white;
+                  color: black;
+                  border: none;
+                  border-radius: 4px;
+                  font-size: 15px;
+                  cursor: pointer;
+                  outline: none;
+                  margin-top: 10px;
+                  margin-left: 8px;
+                  height: 4vh;
+                  margin-bottom: 10px;
+                }
+               
+                .buttonsDiv {
+                  display: flex;
+                  width: 100%;
+                }
+                .undoRedoDiv{
+                  background-color: white;
+                  display:flex;
+                  width:18%;
+                  border-radius:1px
+                }
+                .icon {
+                  display: inline-block;
+                  vertical-align: middle;
+                  width: 14px;
+                  height: 14px;
+                  margin-right: 4px;
                 }
               </style>
             </head>
             <body>
             <div id="editor">
             <div class="buttonsDiv">
-            <div>
-            <button id="executeButton">Run</button>
+            <div class="undoRedoDiv">
+            <div><button id="undoButton">⤹</button></div>
+            <div><button id="redoButton">⤸</button></div>
             </div>
-            <div>
-            <button id="executeButton">{</button>
+            <div><button id="openCurlyBracket">{</button></div>
+            <div><button id="closeCurlyBracket">}</button></div>
+            <div><button id="singleQuote">'</button></div>
+            <div><button id="doubleQuote">"</button></div>
+            <div><button id="openParenthesis">(</button></div>
+            <div><button id="closeParenthesis">)</button></div>
+            <div><button id="openSquareBracket">[</button></div>
+            <div><button id="closeSquareBracket">]</button></div>
+            <div><button id="lessThan"><</button></div>
+            <div><button id="greaterThan">></button></div>
+            <div><button id="executeButton">▶️</button></div>
             </div>
-            <div>
-            <button id="executeButton">}</button></div>
-            <div><button id="executeButton">'</button></div>
-            <div><button id="executeButton">"</button></div>
-            <div><button id="executeButton">(</button></div>
-            <div><button id="executeButton">)</button></div>
-            <div><button id="executeButton">[</button></div>
-            <div><button id="executeButton">]</button></div>
-            <div><button id="executeButton"><</button></div>
-            <div><button id="executeButton">></button></div>
-            <div></div>
-            </div></div>
             
               
               <script>
@@ -87,9 +123,11 @@ const CodeEditor = () => {
                 require(['vs/editor/editor.main'], function() {
                   window.editor = monaco.editor.create(document.getElementById('editor'), {
                     value: [
+                      ' ',
                       'function helloWorld() {',
-                      '  return "Hello, world!";',
+                      '  console.log("Hello, world!");',
                       '}',
+                      ' ',
                       'helloWorld();'
                     ].join('\\n'),
                     language: 'javascript',
@@ -105,6 +143,56 @@ const CodeEditor = () => {
                     }));
                     originalConsoleLog.apply(console, arguments);
                   };
+
+                  // Add this function to insert text at the cursor position
+                function insertText(text) {
+                  const position = window.editor.getPosition();
+                  const range = new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column);
+                  const id = { major: 1, minor: 1 };
+                  const textModel = window.editor.getModel();
+                  const op = { identifier: id, range, text, forceMoveMarkers: true };
+                  textModel.pushEditOperations([], [op], () => null);
+                  window.editor.focus();
+                }
+
+                // Update click event listeners for each button
+                document.getElementById('redoButton').addEventListener('click', function() {
+                  window.editor.trigger('', 'redo', '');
+                });
+                document.getElementById('undoButton').addEventListener('click', function() {
+                  window.editor.trigger('', 'undo', '');
+                });
+                document.getElementById('openCurlyBracket').addEventListener('click', function() {
+                  insertText('{');
+                });
+                document.getElementById('closeCurlyBracket').addEventListener('click', function() {
+                  insertText('}');
+                });
+                document.getElementById('singleQuote').addEventListener('click', function() {
+                  insertText("'");
+                });
+                document.getElementById('doubleQuote').addEventListener('click', function() {
+                  insertText('"');
+                });
+                document.getElementById('openParenthesis').addEventListener('click', function() {
+                  insertText('(');
+                });
+                document.getElementById('closeParenthesis').addEventListener('click', function() {
+                  insertText(')');
+                });
+                document.getElementById('openSquareBracket').addEventListener('click', function() {
+                  insertText('[');
+                });
+                document.getElementById('closeSquareBracket').addEventListener('click', function() {
+                  insertText(']');
+                });
+                document.getElementById('lessThan').addEventListener('click', function() {
+                  insertText('<');
+                });
+                document.getElementById('greaterThan').addEventListener('click', function() {
+                  insertText('>');
+                });
+
 
                   document.getElementById('executeButton').addEventListener('click', function() {
                     const code = window.editor.getValue();
@@ -125,14 +213,20 @@ const CodeEditor = () => {
         style={styles.webview}
         useWebKit={true}
       />
-      
+
       <View style={styles.messagesContainer}>
+        <Text style={styles.consoleEditorHeader}>Output</Text>
         {messages.map((message, index) => (
           <Text key={index} style={styles.messageText}>
             {message}
           </Text>
         ))}
       </View>
+      <Button
+        onPress={() => {
+          setMessages([]);
+        }}
+        title="⛔  Clear Console"></Button>
     </View>
   );
 };
@@ -148,15 +242,23 @@ const styles = StyleSheet.create({
   buttonContainer: {
     backgroundColor: '#1e88e5',
     // padding: 10,
+    width: '100%', // Add this line to make the button container the same width as the editor
   },
   messagesContainer: {
-    height: '20%',
+    height: '30%',
     padding: 10,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: 'white',
+    overflowY: 'auto',
   },
   messageText: {
     fontSize: 14,
     fontFamily: 'monospace',
+    marginBottom: 10,
+  },
+  consoleEditorHeader: {
+    color: 'orange',
+    fontWeight: 'bold',
+    marginBottom: 15,
   },
 });
 
