@@ -1,6 +1,6 @@
 {
   "name": "react-native-monacco-editor",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "By using this we can integrate javascript or monacco code editor into our react-native application",
   "main": "index.js",
   "scripts": {

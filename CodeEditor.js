@@ -223,10 +223,11 @@ const CodeEditor = () => {
         ))}
       </View>
       <Button
+      color="orange"
         onPress={() => {
           setMessages([]);
         }}
-        title="⛔  Clear Console"></Button>
+        title=" Clear Console"></Button>
     </View>
   );
 };
